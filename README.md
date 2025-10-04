@@ -83,4 +83,27 @@ The server will push these as SSE events to connected clients on `/events` so yo
 
 
 
+### Optional: Automatic watch-and-sync
+
+There is a helper script `scripts/watch-and-sync.sh` which can watch the repository for changes and automatically git add/commit/push them. It uses `inotifywait` if available, or falls back to polling.
+
+To run it manually:
+
+```bash
+cd /path/to/ChildrenSafetyBracelet/ChildrenSafetyBracelet
+./scripts/watch-and-sync.sh
+```
+
+To enable it as a systemd user service (optional):
+
+```bash
+# copy or link the unit file to ~/.config/systemd/user/
+mkdir -p ~/.config/systemd/user
+cp systemd/watch-and-sync.service ~/.config/systemd/user/
+systemctl --user daemon-reload
+systemctl --user enable --now watch-and-sync.service
+```
+
+The service is optional and provided as a convenience for development. Use with caution — automatic commits will be created for any changes not ignored by `.gitignore`.
+
 This is the project for 2025 Wireless Innovation Hackathon.
