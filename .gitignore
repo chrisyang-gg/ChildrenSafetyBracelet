@@ -100,3 +100,7 @@ __pycache__/
 logs
 *.log
 
+
+# Repo virtualenvs to ignore
+.venv/
+/webapp/.venv/
