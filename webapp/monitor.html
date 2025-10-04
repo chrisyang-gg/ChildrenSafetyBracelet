@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Device Monitor</title>
+    <style>
+      body { font-family: Arial, sans-serif; padding: 20px }
+      #events { white-space: pre-wrap; border: 1px solid #ccc; padding: 10px; height: 400px; overflow: auto }
+      .fall { color: red; font-weight: bold }
+    </style>
+  </head>
+  <body>
+    <h1>Device Monitor</h1>
+    <p>Listening for server-sent events from <code>/events</code></p>
+    <div id="events"></div>
+
+    <script>
+      const out = document.getElementById('events');
+      const es = new EventSource('/events');
+      es.onmessage = e => {
+        const data = JSON.parse(e.data);
+        const line = document.createElement('div');
+        line.textContent = new Date().toLocaleTimeString() + ' - ' + JSON.stringify(data);
+        if (data.type === 'fall') line.classList.add('fall');
+        out.prepend(line);
+      };
+      es.onerror = err => {
+        const line = document.createElement('div');
+        line.textContent = 'EventSource error';
+        out.prepend(line);
+      };
+    </script>
+  </body>
+</html>

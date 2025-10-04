@@ -1,0 +1,10 @@
+[Unit]
+Description=Run ChildrenSafetyBracelet repo sync every 30s
+
+[Timer]
+OnActiveSec=10
+OnUnitActiveSec=30
+AccuracySec=1s
+
+[Install]
+WantedBy=timers.target

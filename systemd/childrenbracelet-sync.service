@@ -1,0 +1,10 @@
+[Unit]
+Description=ChildrenSafetyBracelet repo sync (pull-only)
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=no
+WorkingDirectory=%h/Desktop/python/wireless\ innovaiton/ChildrenSafetyBracelet/ChildrenSafetyBracelet
+ExecStart=%h/Desktop/python/wireless\ innovaiton/ChildrenSafetyBracelet/ChildrenSafetyBracelet/scripts/sync.sh
