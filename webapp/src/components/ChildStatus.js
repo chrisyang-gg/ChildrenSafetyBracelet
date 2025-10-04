@@ -8,116 +8,156 @@ const ChildStatus = ({ accessibilityMode }) => {
   const [fallDetected, setFallDetected] = useState(false);
   const [lastFallTime, setLastFallTime] = useState(null);
   
-  // Location data
+  // Location data - will be set to user's current location
   const [lastKnownLocation, setLastKnownLocation] = useState({
     lat: 37.7749,
     lng: -122.4194,
-    address: "123 Main Street, San Francisco, California"
+    address: "Locating..." // Will be updated with reverse geocoding
   });
-  const [distance, setDistance] = useState(150);
-  const [direction, setDirection] = useState(45);
+  const [distance, setDistance] = useState(0); // 0 when not connected
+  const [direction, setDirection] = useState(0); // 0 when not connected
 
-  // Announce page on load
+  // Get user's current location on mount
   useEffect(() => {
-    if ('speechSynthesis' in window) {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setLastKnownLocation(prev => ({
+            ...prev,
+            lat: latitude,
+            lng: longitude
+          }));
+          
+          // Reverse geocode to get address
+          fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${process.env.REACT_APP_GOOGLE_MAPS_API_KEY}`)
+            .then(res => res.json())
+            .then(data => {
+              if (data.results && data.results[0]) {
+                setLastKnownLocation(prev => ({
+                  ...prev,
+                  address: data.results[0].formatted_address
+                }));
+              }
+            })
+            .catch(err => {
+              console.error('Geocoding error:', err);
+              setLastKnownLocation(prev => ({
+                ...prev,
+                address: `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`
+              }));
+            });
+        },
+        (error) => {
+          console.error('Geolocation error:', error);
+          setLastKnownLocation(prev => ({
+            ...prev,
+            address: "Location access denied"
+          }));
+        }
+      );
+    }
+  }, []);
+
+  // Announce page once on load
+  useEffect(() => {
+    let spoken = false;
+    
+    if ('speechSynthesis' in window && !spoken) {
+      spoken = true;
       const status = isConnected ? 'connected' : 'disconnected';
-      const utterance = new SpeechSynthesisUtterance(`Child Status page. Device is ${status}. Press Back to return to home.`);
+      // Small delay to prevent double speech in StrictMode
+      const timer = setTimeout(() => {
+        speechSynthesis.cancel(); // Clear any pending speech
+        const utterance = new SpeechSynthesisUtterance(`Child Status page. Device is ${status}.`);
+        utterance.rate = 0.8;
+        speechSynthesis.speak(utterance);
+      }, 100);
+      
+      return () => {
+        clearTimeout(timer);
+        speechSynthesis.cancel();
+      };
+    }
+  }, []); // Only on mount, not when connection changes
+
+  // No simulation - distance and direction stay at 0 until Bluetooth connects
+
+
+
+  const handleHover = (message) => {
+    if ('speechSynthesis' in window) {
+      speechSynthesis.cancel(); // Cancel any ongoing speech
+      const utterance = new SpeechSynthesisUtterance(message);
       utterance.rate = 0.8;
+      utterance.volume = 1;
       speechSynthesis.speak(utterance);
     }
-  }, []);
-
-  // Simulate location updates
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setDistance(prev => Math.max(0, prev + (Math.random() - 0.5) * 10));
-      setDirection(prev => (prev + (Math.random() - 0.5) * 20) % 360);
-    }, 2000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  // Audio feedback for location when disconnected
-  useEffect(() => {
-    if (accessibilityMode?.audio && !isConnected) {
-      const speakLocation = () => {
-        if ('speechSynthesis' in window) {
-          const utterance = new SpeechSynthesisUtterance(
-            `Child last seen at ${lastKnownLocation.address}. Distance: ${Math.round(distance)} meters. Direction: ${Math.round(direction)} degrees.`
-          );
-          utterance.rate = 0.8;
-          speechSynthesis.speak(utterance);
-        }
-      };
-
-      const interval = setInterval(speakLocation, 10000);
-      return () => clearInterval(interval);
-    }
-  }, [accessibilityMode, isConnected, lastKnownLocation.address, distance, direction]);
-
-  // Haptic feedback when disconnected
-  useEffect(() => {
-    if (accessibilityMode?.haptic && !isConnected) {
-      const vibratePattern = () => {
-        if (navigator.vibrate) {
-          navigator.vibrate([200, 100, 200, 100, 200]);
-        }
-      };
-
-      const interval = setInterval(vibratePattern, 5000);
-      return () => clearInterval(interval);
-    }
-  }, [accessibilityMode, isConnected]);
+  };
 
   const handleBack = () => {
-    if ('speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance('Going back to home');
-      utterance.rate = 0.8;
-      speechSynthesis.speak(utterance);
-    }
-    if (navigator.vibrate) {
-      navigator.vibrate(100);
-    }
     navigate('/');
   };
 
   const handleReplayAccelerometer = () => {
-    if (navigator.vibrate) {
-      navigator.vibrate([200, 100, 200]);
-    }
-    if ('speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance('Replaying accelerometer data');
-      utterance.rate = 0.8;
-      speechSynthesis.speak(utterance);
-    }
-  };
-
-  const handleNavigate = () => {
-    if ('speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance('Opening navigation to child location');
-      utterance.rate = 0.8;
-      speechSynthesis.speak(utterance);
-    }
-    if (navigator.vibrate) {
-      navigator.vibrate(200);
-    }
-    const url = `https://www.google.com/maps/dir/?api=1&destination=${lastKnownLocation.lat},${lastKnownLocation.lng}`;
-    window.open(url, '_blank');
+    // Replay accelerometer data
   };
 
   const handleSpeakLocation = () => {
     if ('speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance(
-        `Child last seen at ${lastKnownLocation.address}. Coordinates: ${lastKnownLocation.lat.toFixed(4)}, ${lastKnownLocation.lng.toFixed(4)}. Distance: ${Math.round(distance)} meters. Direction: ${Math.round(direction)} degrees.`
-      );
-      utterance.rate = 0.8;
-      speechSynthesis.speak(utterance);
+      const distanceRounded = Math.round(distance);
+      const directionRounded = Math.round(direction);
+      
+      // Convert direction to more natural language
+      let directionText = '';
+      if (directionRounded >= 337.5 || directionRounded < 22.5) directionText = 'north';
+      else if (directionRounded >= 22.5 && directionRounded < 67.5) directionText = 'northeast';
+      else if (directionRounded >= 67.5 && directionRounded < 112.5) directionText = 'east';
+      else if (directionRounded >= 112.5 && directionRounded < 157.5) directionText = 'southeast';
+      else if (directionRounded >= 157.5 && directionRounded < 202.5) directionText = 'south';
+      else if (directionRounded >= 202.5 && directionRounded < 247.5) directionText = 'southwest';
+      else if (directionRounded >= 247.5 && directionRounded < 292.5) directionText = 'west';
+      else directionText = 'northwest';
+      
+      // Break into separate lines with pauses
+      const line1 = `Child last seen at ${lastKnownLocation.address}.`;
+      const line2 = `${distanceRounded} meters away from you.`;
+      const line3 = `Heading ${directionText}.`;
+      
+      // Speak first line
+      const utterance1 = new SpeechSynthesisUtterance(line1);
+      utterance1.rate = 0.8;
+      speechSynthesis.speak(utterance1);
+      
+      // Wait for first line to finish + 500ms pause, then speak second line
+      utterance1.onend = () => {
+        setTimeout(() => {
+          const utterance2 = new SpeechSynthesisUtterance(line2);
+          utterance2.rate = 0.8;
+          speechSynthesis.speak(utterance2);
+          
+          // Wait for second line to finish + 500ms pause, then speak third line
+          utterance2.onend = () => {
+            setTimeout(() => {
+              const utterance3 = new SpeechSynthesisUtterance(line3);
+              utterance3.rate = 0.8;
+              speechSynthesis.speak(utterance3);
+            }, 500);
+          };
+        }, 500);
+      };
     }
   };
 
   return (
     <div className="child-status">
-      <button onClick={handleBack} className="back-button" aria-label="Go back to home">
+      <button 
+        onClick={handleBack} 
+        onMouseEnter={() => handleHover('Tap to go back to Home')}
+        className="back-button" 
+        aria-label="Go back to home" 
+        title="Tap to go back to Home"
+      >
         <span className="back-text">← Back to Home</span>
       </button>
 
@@ -150,7 +190,7 @@ const ChildStatus = ({ accessibilityMode }) => {
           <div className="fall-status">
             <div className={`status-indicator ${fallDetected ? 'alert' : 'normal'}`}>
               <span className="status-text">
-                {fallDetected ? '🔴 Possible Fall Detected' : '🟢 Normal Activity'}
+                {fallDetected ? 'Possible Fall Detected' : 'Normal Activity'}
               </span>
             </div>
             
@@ -161,7 +201,12 @@ const ChildStatus = ({ accessibilityMode }) => {
               </div>
             )}
             
-            <button onClick={handleReplayAccelerometer} className="action-button">
+            <button 
+              onClick={handleReplayAccelerometer}
+              onMouseEnter={() => handleHover('Tap to replay fall data')}
+              className="action-button" 
+              title="Tap to replay fall data"
+            >
               Replay Accelerometer Data
             </button>
           </div>
@@ -171,26 +216,29 @@ const ChildStatus = ({ accessibilityMode }) => {
         {!isConnected && (
           <>
             <div className="status-card location-card">
-              <h2>Last Known Location</h2>
+              <h2>Location</h2>
               
               <div className="location-alert">
-                <span className="alert-text">⚠️ Device Disconnected</span>
+                <span className="alert-text">Device Disconnected</span>
                 <span className="alert-subtext">Showing last known location</span>
               </div>
 
-              <div className="map-placeholder">
-                <span className="map-emoji">📍</span>
-                <span className="map-label">Child Last Seen Here</span>
+              <div className="map-container">
+                <iframe
+                  width="100%"
+                  height="400"
+                  frameBorder="0"
+                  style={{ border: 0, borderRadius: '8px' }}
+                  src={`https://www.google.com/maps/embed/v1/place?key=${process.env.REACT_APP_GOOGLE_MAPS_API_KEY}&q=${lastKnownLocation.lat},${lastKnownLocation.lng}&zoom=15`}
+                  allowFullScreen
+                  title="Child Location Map"
+                />
               </div>
               
               <div className="location-details">
                 <div className="detail-item">
                   <span className="label">Address:</span>
                   <span className="value">{lastKnownLocation.address}</span>
-                </div>
-                <div className="detail-item">
-                  <span className="label">Coordinates:</span>
-                  <span className="value">{lastKnownLocation.lat.toFixed(4)}, {lastKnownLocation.lng.toFixed(4)}</span>
                 </div>
                 <div className="detail-item">
                   <span className="label">Distance:</span>
@@ -203,26 +251,14 @@ const ChildStatus = ({ accessibilityMode }) => {
               </div>
 
               <div className="action-buttons">
-                <button onClick={handleNavigate} className="action-button navigate-button">
-                  Navigate to Location
-                </button>
-                
-                <button onClick={handleSpeakLocation} className="action-button speak-button">
+                <button 
+                  onClick={handleSpeakLocation}
+                  onMouseEnter={() => handleHover('Tap to hear location details')}
+                  className="action-button speak-button" 
+                  title="Tap to hear location details"
+                >
                   Speak Location Details
                 </button>
-              </div>
-            </div>
-
-            <div className="status-card distance-card">
-              <h2>Distance Indicator</h2>
-              <div className="distance-bar">
-                <div 
-                  className="distance-fill" 
-                  style={{ width: `${Math.min(100, (distance / 200) * 100)}%` }}
-                />
-              </div>
-              <div className="distance-text">
-                {Math.round(distance)}m away
               </div>
             </div>
           </>
