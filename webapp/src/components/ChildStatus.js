@@ -1,14 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './ChildStatus.css';
+import '../shared.css';
 
 const ChildStatus = ({ accessibilityMode }) => {
   const navigate = useNavigate();
-  const [isConnected, setIsConnected] = useState(true);
-  const [audioLevel, setAudioLevel] = useState(45);
-  const [distressDetected, setDistressDetected] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
   const [fallDetected, setFallDetected] = useState(false);
   const [lastFallTime, setLastFallTime] = useState(null);
+  
+  // Location data
+  const [lastKnownLocation, setLastKnownLocation] = useState({
+    lat: 37.7749,
+    lng: -122.4194,
+    address: "123 Main Street, San Francisco, California"
+  });
+  const [distance, setDistance] = useState(150);
+  const [direction, setDirection] = useState(45);
 
   // Announce page on load
   useEffect(() => {
@@ -20,34 +27,47 @@ const ChildStatus = ({ accessibilityMode }) => {
     }
   }, []);
 
-  // Simulate real-time audio levels
+  // Simulate location updates
   useEffect(() => {
     const interval = setInterval(() => {
-      setAudioLevel(prev => Math.max(20, Math.min(100, prev + (Math.random() - 0.5) * 10)));
-    }, 100);
+      setDistance(prev => Math.max(0, prev + (Math.random() - 0.5) * 10));
+      setDirection(prev => (prev + (Math.random() - 0.5) * 20) % 360);
+    }, 2000);
 
     return () => clearInterval(interval);
   }, []);
 
-  // Simulate distress detection
+  // Audio feedback for location when disconnected
   useEffect(() => {
-    if (audioLevel > 80) {
-      setDistressDetected(true);
-      if (accessibilityMode?.audio) {
+    if (accessibilityMode?.audio && !isConnected) {
+      const speakLocation = () => {
         if ('speechSynthesis' in window) {
-          const utterance = new SpeechSynthesisUtterance('Warning! Distress detected!');
-          utterance.rate = 0.9;
-          utterance.volume = 1;
+          const utterance = new SpeechSynthesisUtterance(
+            `Child last seen at ${lastKnownLocation.address}. Distance: ${Math.round(distance)} meters. Direction: ${Math.round(direction)} degrees.`
+          );
+          utterance.rate = 0.8;
           speechSynthesis.speak(utterance);
         }
-      }
-      if (accessibilityMode?.haptic && navigator.vibrate) {
-        navigator.vibrate([200, 100, 200, 100, 200]);
-      }
-    } else {
-      setDistressDetected(false);
+      };
+
+      const interval = setInterval(speakLocation, 10000);
+      return () => clearInterval(interval);
     }
-  }, [audioLevel, accessibilityMode]);
+  }, [accessibilityMode, isConnected, lastKnownLocation.address, distance, direction]);
+
+  // Haptic feedback when disconnected
+  useEffect(() => {
+    if (accessibilityMode?.haptic && !isConnected) {
+      const vibratePattern = () => {
+        if (navigator.vibrate) {
+          navigator.vibrate([200, 100, 200, 100, 200]);
+        }
+      };
+
+      const interval = setInterval(vibratePattern, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [accessibilityMode, isConnected]);
 
   const handleBack = () => {
     if ('speechSynthesis' in window) {
@@ -61,20 +81,35 @@ const ChildStatus = ({ accessibilityMode }) => {
     navigate('/');
   };
 
-  const handlePlayAudio = () => {
-    if ('speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance('Playing last 10 seconds of audio');
-      utterance.rate = 0.8;
-      speechSynthesis.speak(utterance);
-    }
-  };
-
   const handleReplayAccelerometer = () => {
     if (navigator.vibrate) {
       navigator.vibrate([200, 100, 200]);
     }
     if ('speechSynthesis' in window) {
       const utterance = new SpeechSynthesisUtterance('Replaying accelerometer data');
+      utterance.rate = 0.8;
+      speechSynthesis.speak(utterance);
+    }
+  };
+
+  const handleNavigate = () => {
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance('Opening navigation to child location');
+      utterance.rate = 0.8;
+      speechSynthesis.speak(utterance);
+    }
+    if (navigator.vibrate) {
+      navigator.vibrate(200);
+    }
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${lastKnownLocation.lat},${lastKnownLocation.lng}`;
+    window.open(url, '_blank');
+  };
+
+  const handleSpeakLocation = () => {
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(
+        `Child last seen at ${lastKnownLocation.address}. Coordinates: ${lastKnownLocation.lat.toFixed(4)}, ${lastKnownLocation.lng.toFixed(4)}. Distance: ${Math.round(distance)} meters. Direction: ${Math.round(direction)} degrees.`
+      );
       utterance.rate = 0.8;
       speechSynthesis.speak(utterance);
     }
@@ -108,45 +143,6 @@ const ChildStatus = ({ accessibilityMode }) => {
           </div>
         </div>
 
-        {/* Audio Detection Panel */}
-        <div className={`status-card audio-card ${distressDetected ? 'alert' : ''}`}>
-          <h2>Audio Detection</h2>
-          
-          <div className="audio-visualizer">
-            <div className="waveform">
-              {Array.from({ length: 20 }, (_, i) => (
-                <div
-                  key={i}
-                  className="wave-bar"
-                  style={{
-                    height: `${Math.max(10, audioLevel * 0.3 + Math.random() * 20)}%`,
-                    animationDelay: `${i * 0.1}s`
-                  }}
-                />
-              ))}
-            </div>
-            <div className="audio-info">
-              <div className="info-item">
-                <span className="label">Sound Level:</span>
-                <span className="value">{Math.round(audioLevel)} dB</span>
-              </div>
-              <div className="info-item">
-                <span className="label">Frequency:</span>
-                <span className="value">{Math.round(audioLevel * 2.5)} Hz</span>
-              </div>
-            </div>
-          </div>
-
-          {distressDetected && (
-            <div className="distress-alert">
-              <span className="alert-text">⚠️ DISTRESS DETECTED</span>
-              <button onClick={handlePlayAudio} className="action-button alert-button">
-                Play Last 10 Seconds
-              </button>
-            </div>
-          )}
-        </div>
-
         {/* Fall Detection Panel */}
         <div className="status-card fall-card">
           <h2>Fall Detection</h2>
@@ -170,6 +166,67 @@ const ChildStatus = ({ accessibilityMode }) => {
             </button>
           </div>
         </div>
+
+        {/* Location Panel - Only show when disconnected */}
+        {!isConnected && (
+          <>
+            <div className="status-card location-card">
+              <h2>Last Known Location</h2>
+              
+              <div className="location-alert">
+                <span className="alert-text">⚠️ Device Disconnected</span>
+                <span className="alert-subtext">Showing last known location</span>
+              </div>
+
+              <div className="map-placeholder">
+                <span className="map-emoji">📍</span>
+                <span className="map-label">Child Last Seen Here</span>
+              </div>
+              
+              <div className="location-details">
+                <div className="detail-item">
+                  <span className="label">Address:</span>
+                  <span className="value">{lastKnownLocation.address}</span>
+                </div>
+                <div className="detail-item">
+                  <span className="label">Coordinates:</span>
+                  <span className="value">{lastKnownLocation.lat.toFixed(4)}, {lastKnownLocation.lng.toFixed(4)}</span>
+                </div>
+                <div className="detail-item">
+                  <span className="label">Distance:</span>
+                  <span className="value">{Math.round(distance)} meters</span>
+                </div>
+                <div className="detail-item">
+                  <span className="label">Direction:</span>
+                  <span className="value">{Math.round(direction)}°</span>
+                </div>
+              </div>
+
+              <div className="action-buttons">
+                <button onClick={handleNavigate} className="action-button navigate-button">
+                  Navigate to Location
+                </button>
+                
+                <button onClick={handleSpeakLocation} className="action-button speak-button">
+                  Speak Location Details
+                </button>
+              </div>
+            </div>
+
+            <div className="status-card distance-card">
+              <h2>Distance Indicator</h2>
+              <div className="distance-bar">
+                <div 
+                  className="distance-fill" 
+                  style={{ width: `${Math.min(100, (distance / 200) * 100)}%` }}
+                />
+              </div>
+              <div className="distance-text">
+                {Math.round(distance)}m away
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

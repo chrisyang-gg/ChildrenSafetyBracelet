@@ -1,0 +1,895 @@
+/* Shared styles for all components */
+
+/* Common Page Layout */
+.home,
+.child-status,
+.settings {
+  min-height: 100vh;
+  padding: 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.home {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Titles */
+.app-title {
+  color: white;
+  font-size: 4rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 3rem;
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  letter-spacing: 2px;
+}
+
+.page-title {
+  color: white;
+  font-size: 3.5rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 2rem;
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Back Button */
+.back-button {
+  background: white;
+  border: 4px solid transparent;
+  border-radius: 12px;
+  padding: 1.5rem 2rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2c3e50;
+  cursor: pointer;
+  margin-bottom: 2rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.back-button:hover {
+  transform: translateX(-8px);
+  border-color: #ffd700;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+.back-button:focus {
+  outline: 6px solid #ffd700;
+  outline-offset: 4px;
+}
+
+.back-text {
+  font-size: 1.5rem;
+}
+
+/* Grids */
+.home-grid,
+.status-grid,
+.settings-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.home-grid {
+  max-width: 1000px;
+  width: 100%;
+}
+
+/* Home Buttons */
+.home-button {
+  background: white;
+  border: 8px solid transparent;
+  border-radius: 24px;
+  padding: 4rem 3rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  min-height: 200px;
+  text-align: center;
+}
+
+.home-button:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
+  border-color: #ffd700;
+}
+
+.home-button:focus {
+  outline: 8px solid #ffd700;
+  outline-offset: 4px;
+  border-color: #ffd700;
+}
+
+.home-button:active {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+}
+
+.button-text {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #2c3e50;
+  line-height: 1.2;
+}
+
+.button-description {
+  font-size: 1.5rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.child-status-button:hover {
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+}
+
+.settings-button:hover {
+  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+}
+
+/* Cards */
+.status-card,
+.settings-card {
+  background: white;
+  border-radius: 16px;
+  padding: 2.5rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  border: 4px solid transparent;
+}
+
+.status-card:hover,
+.settings-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+  border-color: #ffd700;
+}
+
+.status-card h2,
+.settings-card h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.settings-card h2 {
+  border-bottom: 3px solid #f8f9fa;
+  padding-bottom: 1rem;
+}
+
+/* Labels and Values */
+.label {
+  font-weight: 600;
+  color: #6c757d;
+}
+
+.value {
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+.value.connected {
+  color: #28a745;
+}
+
+.value.disconnected {
+  color: #dc3545;
+}
+
+/* Connection Styles */
+.connection-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.child-name,
+.battery-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.8rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.connection-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  font-size: 2rem;
+  font-weight: 700;
+  padding: 1.5rem;
+  border-radius: 8px;
+}
+
+.connection-indicator.connected {
+  background: #d4edda;
+  color: #155724;
+}
+
+.connection-indicator.disconnected {
+  background: #f8d7da;
+  color: #721c24;
+  animation: pulse 1s infinite;
+}
+
+.status-light {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.connection-indicator.connected .status-light {
+  background: #28a745;
+}
+
+.connection-indicator.disconnected .status-light {
+  background: #dc3545;
+}
+
+/* Fall Detection */
+.fall-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.status-indicator {
+  font-size: 2rem;
+  font-weight: 700;
+  padding: 2rem;
+  border-radius: 12px;
+  width: 100%;
+  text-align: center;
+}
+
+.status-indicator.normal {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-indicator.alert {
+  background: #f8d7da;
+  color: #721c24;
+  animation: pulse 1s infinite;
+}
+
+.fall-timestamp {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.4rem;
+}
+
+/* Location Styles */
+.location-alert {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  background: #fff3cd;
+  border: 4px solid #ffc107;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.alert-text {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #856404;
+}
+
+.alert-subtext {
+  font-size: 1.4rem;
+  color: #856404;
+}
+
+.map-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 3rem;
+  margin-bottom: 1.5rem;
+  min-height: 200px;
+}
+
+.map-emoji {
+  font-size: 5rem;
+  margin-bottom: 1rem;
+}
+
+.map-label {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #6c757d;
+}
+
+.location-details {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.6rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+/* Distance Indicator */
+.distance-bar {
+  width: 100%;
+  height: 40px;
+  background: #e9ecef;
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.distance-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #28a745, #ffc107, #dc3545);
+  transition: width 0.3s ease;
+}
+
+.distance-text {
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: center;
+  color: #2c3e50;
+}
+
+/* Buttons */
+.action-button {
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 1.5rem 2.5rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+.action-button:hover:not(:disabled) {
+  background: #5a6fd8;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+.action-button:focus {
+  outline: 6px solid #ffd700;
+  outline-offset: 4px;
+}
+
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.navigate-button {
+  background: #667eea;
+}
+
+.navigate-button:hover {
+  background: #5a6fd8;
+}
+
+.speak-button {
+  background: #28a745;
+}
+
+.speak-button:hover {
+  background: #218838;
+}
+
+.pair-button.connected {
+  background: #dc3545;
+  color: white;
+}
+
+.pair-button.connected:hover {
+  background: #c82333;
+}
+
+.pair-button.disconnected {
+  background: #28a745;
+  color: white;
+}
+
+.pair-button.disconnected:hover {
+  background: #218838;
+}
+
+.recalibrate-button {
+  background: #667eea;
+  color: white;
+}
+
+.recalibrate-button:hover:not(:disabled) {
+  background: #5a6fd8;
+}
+
+.recalibrate-button:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Settings Specific */
+.device-status {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.status-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.2rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  font-size: 1.6rem;
+}
+
+.device-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.alert-toggles {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.toggle-item {
+  display: flex;
+  align-items: center;
+}
+
+.toggle-item label {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  font-size: 1.6rem;
+  font-weight: 500;
+  width: 100%;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.toggle-item input[type="checkbox"] {
+  width: 28px;
+  height: 28px;
+  accent-color: #667eea;
+  cursor: pointer;
+}
+
+.toggle-label {
+  font-size: 1.6rem;
+  color: #2c3e50;
+}
+
+.sensitivity-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.slider-control {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.slider-label {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.slider {
+  width: 100%;
+  height: 12px;
+  border-radius: 6px;
+  background: #e9ecef;
+  outline: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #667eea;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.slider::-moz-range-thumb {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #667eea;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.accessibility-modes {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.mode-button {
+  padding: 1.5rem 2rem;
+  border: 4px solid #e9ecef;
+  border-radius: 12px;
+  background: white;
+  color: #6c757d;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1.6rem;
+  font-weight: 600;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.mode-button:hover {
+  border-color: #667eea;
+  color: #667eea;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.mode-button:focus {
+  outline: 6px solid #ffd700;
+  outline-offset: 4px;
+}
+
+.mode-button.active {
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.accessibility-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Animations */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .app-title {
+    font-size: 3rem;
+  }
+  
+  .page-title {
+    font-size: 3rem;
+  }
+  
+  .home-button {
+    padding: 3rem 2rem;
+    min-height: 180px;
+  }
+  
+  .button-text {
+    font-size: 2.5rem;
+  }
+  
+  .button-description {
+    font-size: 1.3rem;
+  }
+  
+  .status-card h2,
+  .settings-card h2 {
+    font-size: 2rem;
+  }
+  
+  .back-text {
+    font-size: 1.3rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .home,
+  .child-status,
+  .settings {
+    padding: 1rem;
+  }
+  
+  .app-title {
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .page-title {
+    font-size: 2.5rem;
+  }
+  
+  .home-grid {
+    gap: 1.5rem;
+  }
+  
+  .home-button {
+    padding: 2.5rem 2rem;
+    min-height: 160px;
+    border-width: 6px;
+  }
+  
+  .button-text {
+    font-size: 2rem;
+  }
+  
+  .button-description {
+    font-size: 1.1rem;
+  }
+  
+  .status-card,
+  .settings-card {
+    padding: 1.5rem;
+  }
+  
+  .status-card h2,
+  .settings-card h2 {
+    font-size: 1.8rem;
+  }
+  
+  .back-button {
+    padding: 1rem 1.5rem;
+  }
+  
+  .back-text {
+    font-size: 1.2rem;
+  }
+  
+  .child-name,
+  .battery-status,
+  .detail-item,
+  .status-item {
+    font-size: 1.4rem;
+  }
+  
+  .status-item {
+    padding: 1rem;
+  }
+  
+  .connection-indicator {
+    font-size: 1.6rem;
+  }
+  
+  .alert-text {
+    font-size: 1.6rem;
+  }
+  
+  .alert-subtext {
+    font-size: 1.2rem;
+  }
+  
+  .action-button {
+    font-size: 1.3rem;
+    padding: 1.2rem 2rem;
+  }
+  
+  .status-indicator {
+    font-size: 1.6rem;
+  }
+  
+  .map-emoji {
+    font-size: 4rem;
+  }
+  
+  .map-label {
+    font-size: 1.6rem;
+  }
+  
+  .distance-text {
+    font-size: 1.6rem;
+  }
+  
+  .toggle-label,
+  .slider-label {
+    font-size: 1.3rem;
+  }
+  
+  .mode-button {
+    font-size: 1.3rem;
+    padding: 1.2rem 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-title {
+    font-size: 2rem;
+  }
+  
+  .page-title {
+    font-size: 2rem;
+  }
+  
+  .home-button {
+    padding: 2rem 1.5rem;
+    min-height: 140px;
+  }
+  
+  .button-text {
+    font-size: 1.8rem;
+  }
+  
+  .button-description {
+    font-size: 1rem;
+  }
+  
+  .status-card h2,
+  .settings-card h2 {
+    font-size: 1.5rem;
+  }
+  
+  .map-emoji {
+    font-size: 3rem;
+  }
+  
+  .status-item {
+    font-size: 1.1rem;
+  }
+  
+  .action-button {
+    font-size: 1.1rem;
+  }
+  
+  .toggle-label,
+  .slider-label {
+    font-size: 1.1rem;
+  }
+}
+
+/* Accessibility Improvements */
+@media (prefers-reduced-motion: reduce) {
+  .home-button,
+  .back-button,
+  .status-card,
+  .settings-card,
+  .action-button,
+  .mode-button {
+    transition: none;
+  }
+  
+  .home-button:hover,
+  .home-button:active,
+  .back-button:hover,
+  .status-card:hover,
+  .settings-card:hover,
+  .action-button:hover,
+  .mode-button:hover {
+    transform: none;
+  }
+  
+  .status-indicator.alert,
+  .status-light,
+  .distance-fill {
+    animation: none;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .home,
+  .child-status,
+  .settings {
+    background: #000;
+  }
+  
+  .app-title,
+  .page-title {
+    color: #fff;
+    text-shadow: none;
+  }
+  
+  .home-button {
+    background: #fff;
+    border-color: #fff;
+  }
+  
+  .home-button:hover,
+  .home-button:focus {
+    background: #000;
+    color: #fff;
+    border-color: #fff;
+  }
+  
+  .home-button:hover .button-text,
+  .home-button:focus .button-text,
+  .home-button:hover .button-description,
+  .home-button:focus .button-description {
+    color: #fff;
+  }
+  
+  .status-card,
+  .settings-card,
+  .back-button {
+    border: 4px solid #fff;
+  }
+  
+  .connection-indicator.connected,
+  .status-indicator.normal {
+    background: #000;
+    color: #fff;
+    border: 4px solid #0f0;
+  }
+  
+  .connection-indicator.disconnected,
+  .status-indicator.alert,
+  .location-alert {
+    background: #000;
+    color: #fff;
+    border: 4px solid #f00;
+  }
+  
+  .mode-button {
+    border-color: #fff;
+  }
+  
+  .mode-button.active {
+    background: #000;
+    color: #fff;
+    border-color: #fff;
+  }
+  
+  .slider::-webkit-slider-thumb,
+  .slider::-moz-range-thumb {
+    background: #fff;
+  }
+}

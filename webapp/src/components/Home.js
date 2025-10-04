@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './Home.css';
+import '../shared.css';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -25,7 +25,7 @@ const Home = () => {
   // Announce page on load
   useEffect(() => {
     if ('speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance('GuardianLink. Select an option. Child Status, Map and Location, or Settings.');
+      const utterance = new SpeechSynthesisUtterance('GuardianLink. Select an option. Child Status or Settings.');
       utterance.rate = 0.8;
       utterance.volume = 1;
       speechSynthesis.speak(utterance);
@@ -40,19 +40,10 @@ const Home = () => {
         <button
           className="home-button child-status-button"
           onClick={() => handleNavigation('/child-status', 'Child Status')}
-          aria-label="Child Status - Monitor your child's safety in real-time"
+          aria-label="Child Status - Monitor your child's safety and location"
         >
           <span className="button-text">Child Status</span>
-          <span className="button-description">Monitor your child's safety in real-time</span>
-        </button>
-
-        <button
-          className="home-button map-button"
-          onClick={() => handleNavigation('/map', 'Map and Location')}
-          aria-label="Map and Location - View your child's location"
-        >
-          <span className="button-text">Map & Location</span>
-          <span className="button-description">View your child's location</span>
+          <span className="button-description">Monitor your child's safety and location</span>
         </button>
 
         <button

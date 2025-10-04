@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './Settings.css';
+import '../shared.css';
 
 const Settings = ({ accessibilityMode, setAccessibilityMode }) => {
   const navigate = useNavigate();
@@ -14,7 +14,7 @@ const Settings = ({ accessibilityMode, setAccessibilityMode }) => {
     audio: true,
     vibration: true,
     visual: true,
-    screamThreshold: 75,
+    distanceAlertThreshold: 30, // meters - alert when child is this far away
     fallSensitivity: 50
   });
 
@@ -144,6 +144,11 @@ const Settings = ({ accessibilityMode, setAccessibilityMode }) => {
               <span className="label">Signal:</span>
               <span className="value">{deviceSettings.signalStrength}</span>
             </div>
+
+            <div className="status-item">
+              <span className="label">Bluetooth Range:</span>
+              <span className="value">~30m typical</span>
+            </div>
           </div>
 
           <div className="device-actions">
@@ -206,14 +211,15 @@ const Settings = ({ accessibilityMode, setAccessibilityMode }) => {
           <div className="sensitivity-controls">
             <div className="slider-control">
               <label className="slider-label">
-                Scream Detection: {alertSettings.screamThreshold} dB
+                Distance Alert: {alertSettings.distanceAlertThreshold} meters
               </label>
               <input
                 type="range"
-                min="50"
+                min="10"
                 max="100"
-                value={alertSettings.screamThreshold}
-                onChange={(e) => handleSliderChange('screamThreshold', e.target.value)}
+                step="5"
+                value={alertSettings.distanceAlertThreshold}
+                onChange={(e) => handleSliderChange('distanceAlertThreshold', e.target.value)}
                 className="slider"
               />
             </div>
