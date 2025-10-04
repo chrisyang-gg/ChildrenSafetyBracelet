@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../shared.css';
+import MapView from './MapView';
+import './MapView.css';
 
 const ChildStatus = ({ accessibilityMode }) => {
   const navigate = useNavigate();
@@ -216,8 +218,7 @@ const ChildStatus = ({ accessibilityMode }) => {
               </div>
 
               <div className="map-placeholder">
-                <span className="map-emoji">📍</span>
-                <span className="map-label">Child Last Seen Here</span>
+                <MapView lat={lastKnownLocation.lat} lng={lastKnownLocation.lng} />
               </div>
               
               <div className="location-details">
