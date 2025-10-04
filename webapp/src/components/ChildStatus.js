@@ -37,6 +37,43 @@ const ChildStatus = ({ accessibilityMode }) => {
     return () => clearInterval(interval);
   }, []);
 
+  // Listen for server-sent events (location, fall, presence)
+  useEffect(() => {
+    const es = new EventSource('/events');
+    es.onmessage = (e) => {
+      try {
+        const data = JSON.parse(e.data);
+        if (data.type === 'location') {
+          // update last known location and mark as connected
+          if (data.lat && data.lng) {
+            setLastKnownLocation(prev => ({ ...prev, lat: data.lat, lng: data.lng, address: data.address || prev.address }));
+          }
+          // Estimate distance from RSSI (very rough): max 200m mapping
+          if (typeof data.rssi === 'number') {
+            const est = Math.min(200, Math.max(0, 200 - Math.abs(data.rssi) * 2));
+            setDistance(Math.round(est));
+          }
+          setIsConnected(true);
+        } else if (data.type === 'fall') {
+          setFallDetected(true);
+          setLastFallTime(new Date());
+          // clear fall state after 8s
+          setTimeout(() => setFallDetected(false), 8000);
+        } else if (data.type === 'presence') {
+          setIsConnected(true);
+        }
+      } catch (err) {
+        // ignore parse errors
+      }
+    };
+    es.onerror = () => {
+      // If SSE fails, mark disconnected after a timeout
+      setTimeout(() => setIsConnected(false), 3000);
+    };
+
+    return () => es.close();
+  }, []);
+
   // Audio feedback for location when disconnected
   useEffect(() => {
     if (accessibilityMode?.audio && !isConnected) {
