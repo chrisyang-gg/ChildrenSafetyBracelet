@@ -20,7 +20,12 @@ try:
     from bleak import BleakScanner
     BLE_AVAILABLE = True
 except Exception:
+    BleakScanner = None
     BLE_AVAILABLE = False
+
+# Only enable BLE scanning if the environment variable ENABLE_BLE=1 is set.
+# This prevents the server from failing during development when hardware isn't ready.
+BLE_ENABLED = os.getenv("ENABLE_BLE", "0") == "1"
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for React frontend
@@ -556,6 +561,69 @@ def config():
         "disconnect_threshold": DISCONNECT_THRESHOLD,
         "target_device_name": TARGET_DEVICE_NAME
     })
+
+
+@app.route("/ingest", methods=["POST"])
+def ingest():
+    """Generic ingest endpoint for hardware: accepts JSON payloads containing
+    device_id, rssi, lat, lng, and fall (boolean). The server immediately
+    pushes corresponding SSE events so the front-end can react in real-time.
+
+    Example payloads:
+      {"device_id":"DEV123","rssi":-42}
+      {"device_id":"DEV123","lat":37.7749, "lng":-122.4194}
+      {"device_id":"DEV123","fall":true, "severity":"high"}
+    """
+    try:
+        data = request.get_json(force=True)
+    except Exception:
+        return jsonify({"ok": False, "error": "invalid json"}), 400
+
+    device = data.get("device_id") or data.get("address") or "unknown"
+
+    # If hardware reports fall directly
+    if data.get("fall"):
+        ev = {
+            "type": "fall",
+            "device": device,
+            "severity": data.get("severity", "high"),
+            "meta": data.get("meta", {}),
+            "source": "ingest"
+        }
+        push_event(ev)
+        return jsonify({"ok": True, "event": ev})
+
+    # If hardware reports location
+    if "lat" in data and "lng" in data:
+        ev = {
+            "type": "location",
+            "device": device,
+            "lat": float(data["lat"]),
+            "lng": float(data["lng"]),
+            "rssi": data.get("rssi"),
+            "source": "ingest"
+        }
+        push_event(ev)
+        return jsonify({"ok": True, "event": ev})
+
+    # Fallback: rssi-only presence/location
+    if "rssi" in data:
+        ev = {
+            "type": "location",
+            "device": device,
+            "rssi": data.get("rssi"),
+            "source": "ingest"
+        }
+        push_event(ev)
+        return jsonify({"ok": True, "event": ev})
+
+    return jsonify({"ok": False, "error": "no recognized fields"}), 400
+
+
+@app.route("/monitor")
+def monitor_html():
+    # serve a simple static monitor page included in this folder
+    return send_from_directory(os.path.dirname(__file__), "monitor.html")
 
 
 @app.route("/")
