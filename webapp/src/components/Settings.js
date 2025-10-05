@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import bluetoothManager from '../utils/bluetooth';
 import '../shared.css';
 
 const Settings = ({ accessibilityMode, setAccessibilityMode }) => {
@@ -16,6 +17,34 @@ const Settings = ({ accessibilityMode, setAccessibilityMode }) => {
     vibration: true,
     visual: true
   });
+
+  // Fetch device status from backend
+  useEffect(() => {
+    const fetchStatus = async () => {
+      try {
+        const response = await fetch('http://localhost:5001/api/status');
+        const data = await response.json();
+        
+        if (data.device) {
+          setDeviceSettings(prev => ({
+            ...prev,
+            isPaired: data.device.connected,
+            batteryLevel: data.device.battery || 85
+          }));
+        }
+      } catch (error) {
+        console.error('Error fetching status:', error);
+      }
+    };
+    
+    // Fetch immediately
+    fetchStatus();
+    
+    // Then fetch every 3 seconds
+    const interval = setInterval(fetchStatus, 3000);
+    
+    return () => clearInterval(interval);
+  }, []);
 
   // Announce page once on load
   useEffect(() => {
@@ -56,23 +85,83 @@ const Settings = ({ accessibilityMode, setAccessibilityMode }) => {
     navigate('/');
   };
 
-  const handlePairDevice = () => {
-    const newPairStatus = !deviceSettings.isPaired;
-    setDeviceSettings(prev => ({
-      ...prev,
-      isPaired: newPairStatus
-    }));
+  const handlePairDevice = async () => {
+    const currentStatus = deviceSettings.isPaired;
     
-    // Announce connection status change
-    if ('speechSynthesis' in window) {
-      const message = newPairStatus ? 'Device connected' : 'Device disconnected';
-      const utterance = new SpeechSynthesisUtterance(message);
-      utterance.rate = 0.8;
-      speechSynthesis.speak(utterance);
-    }
-    
-    if (navigator.vibrate) {
-      navigator.vibrate(newPairStatus ? [100, 50, 100] : 200);
+    if (!currentStatus) {
+      // Connect to Bluetooth
+      try {
+        if (!bluetoothManager.isSupported()) {
+          alert('Web Bluetooth is not supported in this browser. Please use Chrome, Edge, or Opera.');
+          return;
+        }
+
+        // Show connection dialog
+        const result = await bluetoothManager.connect();
+        
+        // Update state
+        setDeviceSettings(prev => ({
+          ...prev,
+          isPaired: true
+        }));
+        
+        // Set up RSSI monitoring
+        bluetoothManager.onRSSIUpdate = (data) => {
+          setDeviceSettings(prev => ({
+            ...prev,
+            isPaired: data.connected
+          }));
+        };
+        
+        bluetoothManager.onConnectionChange = (connected) => {
+          setDeviceSettings(prev => ({
+            ...prev,
+            isPaired: connected
+          }));
+          
+          if ('speechSynthesis' in window) {
+            const message = connected ? 'Device connected' : 'Device disconnected';
+            const utterance = new SpeechSynthesisUtterance(message);
+            utterance.rate = 0.8;
+            speechSynthesis.speak(utterance);
+          }
+        };
+        
+        // Announce success
+        if ('speechSynthesis' in window) {
+          const utterance = new SpeechSynthesisUtterance('Device connected successfully');
+          utterance.rate = 0.8;
+          speechSynthesis.speak(utterance);
+        }
+        
+      } catch (error) {
+        console.error('Bluetooth connection error:', error);
+        
+        // Announce error
+        if ('speechSynthesis' in window) {
+          const utterance = new SpeechSynthesisUtterance('Connection failed. Please try again.');
+          utterance.rate = 0.8;
+          speechSynthesis.speak(utterance);
+        }
+        
+        alert('Failed to connect: ' + error.message);
+      }
+    } else {
+      // Disconnect
+      bluetoothManager.disconnect();
+      bluetoothManager.stopRSSIMonitoring();
+      
+      setDeviceSettings(prev => ({
+        ...prev,
+        isPaired: false
+      }));
+      
+      // Announce disconnection
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance('Device disconnected');
+        utterance.rate = 0.8;
+        speechSynthesis.speak(utterance);
+      }
     }
   };
 

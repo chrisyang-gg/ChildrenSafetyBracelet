@@ -1,4 +1,3 @@
-Flask>=2.0
-blessed
-# Optional: bleak for BLE scanning (only needed if you have BLE hardware)
-bleak==0.20.3
+Flask==3.0.0
+flask-cors==4.0.0
+bleak>=0.19.0

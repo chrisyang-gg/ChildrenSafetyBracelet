@@ -48,7 +48,14 @@ const Home = () => {
 
   return (
     <div className="home">
-      <h1 className="app-title">GuardianLink</h1>
+      <div className="header-container">
+        <img 
+          src="/guardianlink.png" 
+          alt="GuardianLink Logo" 
+          className="app-logo-small"
+        />
+        <h1 className="app-title">GuardianLink</h1>
+      </div>
       
       <div className="home-grid">
         <button
