@@ -14,7 +14,7 @@ const Home = () => {
       // Small delay to prevent double speech in StrictMode
       const timer = setTimeout(() => {
         speechSynthesis.cancel(); // Clear any pending speech
-        const utterance = new SpeechSynthesisUtterance('GuardianLink Home. Select Child Status or Settings.');
+        const utterance = new SpeechSynthesisUtterance('GuardianLink Home. Select Child Status.');
         utterance.rate = 0.8;
         utterance.volume = 1;
         speechSynthesis.speak(utterance);
@@ -69,16 +69,6 @@ const Home = () => {
           <span className="button-description">Monitor your child's safety and location</span>
         </button>
 
-        <button
-          className="home-button settings-button"
-          onClick={() => handleNavigation('/settings')}
-          onMouseEnter={() => handleHover('Tap to continue to Settings')}
-          aria-label="Settings - Configure device and alerts"
-          title="Tap to continue to Settings"
-        >
-          <span className="button-text">Settings</span>
-          <span className="button-description">Configure device and alerts</span>
-        </button>
       </div>
     </div>
   );

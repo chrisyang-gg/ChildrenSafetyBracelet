@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import '../shared.css';
 import MapView from './MapView';
 import './MapView.css';
 
 const ChildStatus = ({ accessibilityMode }) => {
-  const navigate = useNavigate();
   const [isConnected, setIsConnected] = useState(false);
   const [fallDetected, setFallDetected] = useState(false);
   const [lastFallTime, setLastFallTime] = useState(null);
@@ -30,7 +28,7 @@ const ChildStatus = ({ accessibilityMode }) => {
   useEffect(() => {
     if ('speechSynthesis' in window) {
       const status = isConnected ? 'connected' : 'disconnected';
-      const utterance = new SpeechSynthesisUtterance(`Child Status page. Device is ${status}. Press Back to return to home.`);
+      const utterance = new SpeechSynthesisUtterance(`GuardianLink Child Status. Device is ${status}.`);
       utterance.rate = 0.8;
       speechSynthesis.speak(utterance);
     }
@@ -266,17 +264,6 @@ const ChildStatus = ({ accessibilityMode }) => {
     }
   }, [accessibilityMode, isConnected]);
 
-  const handleBack = () => {
-    if ('speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance('Going back to home');
-      utterance.rate = 0.8;
-      speechSynthesis.speak(utterance);
-    }
-    if (navigator.vibrate) {
-      navigator.vibrate(100);
-    }
-    navigate('/');
-  };
 
   const handleReplayAccelerometer = () => {
     if (navigator.vibrate) {
@@ -329,11 +316,14 @@ const ChildStatus = ({ accessibilityMode }) => {
 
   return (
     <div className="child-status">
-      <button onClick={handleBack} className="back-button" aria-label="Go back to home">
-        <span className="back-text">← Back to Home</span>
-      </button>
-
-      <h1 className="page-title">Child Status</h1>
+      <div className="header-container" style={{ textAlign: 'center', marginBottom: '2rem' }}>
+        <img 
+          src="/guardianlink.png" 
+          alt="GuardianLink Logo" 
+          className="app-logo-small"
+        />
+        <h1 className="app-title">GuardianLink</h1>
+      </div>
 
       <div className="status-grid">
         {/* Connection Status */}
@@ -345,10 +335,6 @@ const ChildStatus = ({ accessibilityMode }) => {
               <span className="status-text">{isConnected ? 'Connected' : 'Disconnected'}</span>
             </div>
             
-            <div className="battery-status">
-              <span className="label">Battery:</span>
-              <span className="value">85%</span>
-            </div>
           </div>
         </div>
 
@@ -359,7 +345,7 @@ const ChildStatus = ({ accessibilityMode }) => {
           <div className="fall-status">
             <div className={`status-indicator ${fallDetected ? 'alert' : 'normal'}`}>
               <span className="status-text">
-                {fallDetected ? '🔴 Possible Fall Detected' : '🟢 Normal Activity'}
+                {fallDetected ? 'Possible Fall Detected' : 'Normal Activity'}
               </span>
             </div>
             
@@ -438,10 +424,6 @@ const ChildStatus = ({ accessibilityMode }) => {
               >
                 {proximityZone.replace('_', ' ').toUpperCase()}
               </span>
-            </div>
-            <div className="detail-item">
-              <span className="label">Direction:</span>
-              <span className="value">{Math.round(direction)}°</span>
             </div>
           </div>
 

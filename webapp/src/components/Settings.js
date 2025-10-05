@@ -5,7 +5,6 @@ import '../shared.css';
 
 const Settings = ({ accessibilityMode, setAccessibilityMode }) => {
   const navigate = useNavigate();
-  const [childName, setChildName] = useState('Emma');
   const [deviceSettings, setDeviceSettings] = useState({
     isPaired: false,
     batteryLevel: 85,
@@ -193,24 +192,6 @@ const Settings = ({ accessibilityMode, setAccessibilityMode }) => {
       <h1 className="page-title">Settings</h1>
 
       <div className="settings-grid">
-        {/* Child Information Section */}
-        <div className="settings-card">
-          <h2>Child Information</h2>
-          
-          <div className="child-name-input">
-            <label htmlFor="childName" className="input-label">
-              Child's Name:
-            </label>
-            <input
-              id="childName"
-              type="text"
-              value={childName}
-              onChange={(e) => setChildName(e.target.value)}
-              className="name-input"
-              placeholder="Enter child's name"
-            />
-          </div>
-        </div>
 
         {/* Device Pairing Section */}
         <div className="settings-card">
