@@ -19,9 +19,9 @@ const ChildStatus = ({ accessibilityMode }) => {
   
   // Location data
   const [lastKnownLocation, setLastKnownLocation] = useState({
-    lat: 37.7749,
-    lng: -122.4194,
-    address: "123 Main Street, San Francisco, California"
+    lat: null,
+    lng: null,
+    address: "Locating..."
   });
   const [distance, setDistance] = useState(150);
   const [direction, setDirection] = useState(45);
@@ -34,6 +34,60 @@ const ChildStatus = ({ accessibilityMode }) => {
       utterance.rate = 0.8;
       speechSynthesis.speak(utterance);
     }
+  }, []);
+
+  // Request browser geolocation and send parent location to backend
+  useEffect(() => {
+    if (!('geolocation' in navigator)) {
+      setLastKnownLocation(prev => ({ ...prev, address: 'Geolocation unavailable' }));
+      return;
+    }
+
+    let watchId = null;
+
+    const sendLocationToBackend = async (lat, lng, heading = 0) => {
+      try {
+        await fetch('http://localhost:5001/api/parent-location', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ lat, lng, heading })
+        });
+      } catch (err) {
+        // ignore failures - backend may not be running yet
+        console.debug('Failed to POST parent location:', err);
+      }
+    };
+
+    const success = (position) => {
+      const { latitude, longitude } = position.coords;
+      setLastKnownLocation(prev => ({ ...prev, lat: latitude, lng: longitude, address: 'Current location' }));
+      sendLocationToBackend(latitude, longitude, 0);
+    };
+
+    const error = (err) => {
+      console.warn('Geolocation error:', err);
+      setLastKnownLocation(prev => ({ ...prev, address: 'Location unavailable' }));
+    };
+
+    // Try to get current position once
+    navigator.geolocation.getCurrentPosition(success, error, { enableHighAccuracy: true, timeout: 8000 });
+
+    // Also watch for updates
+    try {
+      watchId = navigator.geolocation.watchPosition((pos) => {
+        const { latitude, longitude } = pos.coords;
+        setLastKnownLocation(prev => ({ ...prev, lat: latitude, lng: longitude, address: 'Current location' }));
+        sendLocationToBackend(latitude, longitude, 0);
+      }, (e) => {
+        console.debug('watchPosition error', e);
+      }, { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 });
+    } catch (e) {
+      // ignore
+    }
+
+    return () => {
+      if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+    };
   }, []);
 
   // Simulate location updates
@@ -235,6 +289,15 @@ const ChildStatus = ({ accessibilityMode }) => {
     }
   };
 
+  const handleHover = (message) => {
+    if ('speechSynthesis' in window) {
+      speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(message);
+      utterance.rate = 0.8;
+      speechSynthesis.speak(utterance);
+    }
+  };
+
   const handleNavigate = () => {
     if ('speechSynthesis' in window) {
       const utterance = new SpeechSynthesisUtterance('Opening navigation to child location');
@@ -250,13 +313,19 @@ const ChildStatus = ({ accessibilityMode }) => {
 
   const handleSpeakLocation = () => {
     if ('speechSynthesis' in window) {
+      const latText = lastKnownLocation.lat ? lastKnownLocation.lat.toFixed(4) : 'unknown';
+      const lngText = lastKnownLocation.lng ? lastKnownLocation.lng.toFixed(4) : 'unknown';
       const utterance = new SpeechSynthesisUtterance(
-        `Child last seen at ${lastKnownLocation.address}. Coordinates: ${lastKnownLocation.lat.toFixed(4)}, ${lastKnownLocation.lng.toFixed(4)}. Distance: ${Math.round(distance)} meters. Direction: ${Math.round(direction)} degrees.`
+        `Child last seen at ${lastKnownLocation.address}. Coordinates: ${latText}, ${lngText}. Distance: ${Math.round(distance)} meters. Direction: ${Math.round(direction)} degrees.`
       );
       utterance.rate = 0.8;
       speechSynthesis.speak(utterance);
     }
   };
+
+  // Determine map center (fallback to Pittsburgh)
+  const mapLat = lastKnownLocation.lat ?? 40.440624;
+  const mapLng = lastKnownLocation.lng ?? -79.995888;
 
   return (
     <div className="child-status">
@@ -324,7 +393,7 @@ const ChildStatus = ({ accessibilityMode }) => {
               height="400"
               frameBorder="0"
               style={{ border: 0, borderRadius: '8px' }}
-              src={`https://www.google.com/maps/embed/v1/place?key=${process.env.REACT_APP_GOOGLE_MAPS_API_KEY}&q=${lastKnownLocation.lat},${lastKnownLocation.lng}&zoom=15`}
+              src={`https://www.google.com/maps/embed/v1/place?key=${process.env.REACT_APP_GOOGLE_MAPS_API_KEY}&q=${mapLat},${mapLng}&zoom=15`}
               allowFullScreen
               title="Child Location Map"
             />
