@@ -59,5 +59,51 @@ Quick steps:
 
 Then open http://localhost:5000/monitor to view events. The run script creates/uses `.venv` in the repo root and installs required packages from `webapp/requirements.txt`.
 
+Hardware integration
+--------------------
+
+While your BLE hardware and fall-detection accelerometer are being completed, you can start sending events to the server immediately over HTTP. The server exposes a simple `/ingest` endpoint that accepts JSON POSTs from the device (or a gateway) and forwards them to the web UI via Server-Sent Events.
+
+Example payloads (POST JSON to `http://<server>:5000/ingest`):
+
+- Location by coordinates:
+```json
+{"device_id":"DEV123","lat":37.7749,"lng":-122.4194}
+```
+- Presence or RSSI-only (for BLE-based location later):
+```json
+{"device_id":"DEV123","rssi":-42}
+```
+- Fall event (sent by accelerometer logic):
+```json
+{"device_id":"DEV123","fall":true,"severity":"high"}
+```
+
+The server will push these as SSE events to connected clients on `/events` so your web front-end (or the included `monitor.html`) will receive them immediately.
+
+
+
+### Optional: Automatic watch-and-sync
+
+There is a helper script `scripts/watch-and-sync.sh` which can watch the repository for changes and automatically git add/commit/push them. It uses `inotifywait` if available, or falls back to polling.
+
+To run it manually:
+
+```bash
+cd /path/to/ChildrenSafetyBracelet/ChildrenSafetyBracelet
+./scripts/watch-and-sync.sh
+```
+
+To enable it as a systemd user service (optional):
+
+```bash
+# copy or link the unit file to ~/.config/systemd/user/
+mkdir -p ~/.config/systemd/user
+cp systemd/watch-and-sync.service ~/.config/systemd/user/
+systemctl --user daemon-reload
+systemctl --user enable --now watch-and-sync.service
+```
+
+The service is optional and provided as a convenience for development. Use with caution — automatic commits will be created for any changes not ignored by `.gitignore`.
 
 This is the project for 2025 Wireless Innovation Hackathon.

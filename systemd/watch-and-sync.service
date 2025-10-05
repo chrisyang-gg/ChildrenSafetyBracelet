@@ -1,0 +1,14 @@
+[Unit]
+Description=ChildrenSafetyBracelet repo watch-and-sync
+After=network.target
+
+[Service]
+Type=simple
+Environment=GIT_REMOTE=origin
+Environment=GIT_BRANCH=main
+WorkingDirectory=%h/Desktop/python/wireless\ innovaiton/ChildrenSafetyBracelet/ChildrenSafetyBracelet
+ExecStart=%h/Desktop/python/wireless\ innovaiton/ChildrenSafetyBracelet/ChildrenSafetyBracelet/scripts/watch-and-sync.sh
+Restart=on-failure
+
+[Install]
+WantedBy=default.target
